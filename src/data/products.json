@@ -1,0 +1,8 @@
+[
+  { "id": "pan-frances", "name": "Pan francés", "price": 0.5, "image": "pan-frances.jpg" },
+  { "id": "torta-chocolate", "name": "Torta chocolate", "price": 8.0, "image": "torta-chocolate.jpg" },
+  { "id": "pie-limon", "name": "Pie de limón", "price": 5.0, "image": "pie-limon.jpg" },
+  { "id": "pie-manzana", "name": "Pie de manzana", "price": 5.0, "image": "pie-manzana.jpg" },
+  { "id": "mil-hojas", "name": "Mil hojas", "price": 2.5, "image": "mil-hojas.jpg" },
+  { "id": "torta-fresa", "name": "Torta fresa", "price": 9.0, "image": "torta-fresa.jpg" }
+]
