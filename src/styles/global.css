@@ -279,3 +279,21 @@ body { margin: 0; background: #f6f7fb; font-family: system-ui, -apple-system, Se
 /* fila para selector + crear categoría */
 .catPickRow{ display:flex; gap:10px; align-items:center; }
 .catPickRow .fieldInput{ flex: 1; }
+
+.fileHidden{
+  display:none;
+}
+
+.photoRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.filePicked{
+  margin-top: 8px;
+  font-size: 13px;
+  opacity: .8;
+  font-weight: 700;
+}

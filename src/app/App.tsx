@@ -374,14 +374,45 @@ function ProductEditorModal({
           </div>
 
           <label className="field">
-            <div className="fieldLabel">Foto (subir o tomar)</div>
-            <input
-              className="fieldInput"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
+            <div className="fieldLabel">Foto</div>
+
+            <div className="photoRow">
+              {/* Elegir de galería/archivos (NO abre cámara forzada) */}
+              <input
+                id="pickFile"
+                className="fileHidden"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              <button
+                type="button"
+                className="btnSecondary"
+                onClick={() => document.getElementById("pickFile")?.click()}
+              >
+                Elegir de galería / archivos
+              </button>
+
+              {/* Tomar foto (fuerza cámara) */}
+              <input
+                id="takePhoto"
+                className="fileHidden"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              <button
+                type="button"
+                className="btnSecondary"
+                onClick={() => document.getElementById("takePhoto")?.click()}
+              >
+                Tomar foto
+              </button>
+            </div>
+
+            {file && <div className="filePicked">📷 {file.name}</div>}
+
             {initial && (
               <label className="keepImgRow">
                 <input
