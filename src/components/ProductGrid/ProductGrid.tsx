@@ -3,15 +3,17 @@ import ProductCard from "./ProductCard";
 
 export default function ProductGrid({
   products,
-  onAdd,
+  onProductClick,
+  isEditMode,
 }: {
   products: Product[];
-  onAdd: (p: Product) => void;
+  onProductClick: (p: Product) => void;
+  isEditMode: boolean;
 }) {
   return (
     <div className="grid">
       {products.map((p) => (
-        <ProductCard key={p.id} product={p} onAdd={onAdd} />
+        <ProductCard key={p.id} product={p} onClick={onProductClick} isEditMode={isEditMode} />
       ))}
     </div>
   );

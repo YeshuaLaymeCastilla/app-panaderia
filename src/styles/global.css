@@ -137,3 +137,145 @@ body { margin: 0; background: #f6f7fb; font-family: system-ui, -apple-system, Se
   color: white;
 }
 .btnCloseApp:hover { opacity: .92; }
+
+/* Filters */
+.filters { margin-bottom: 10px; }
+.catRow { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.chip {
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.chipActive { background:#111827; color:#fff; border-color:#111827; }
+
+.searchRow { display:flex; gap:10px; align-items:center; }
+.searchInput {
+  flex:1;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-weight: 700;
+}
+.searchHint { margin-top: 6px; font-size: 13px; opacity: .75; }
+
+.emptyBox{
+  background:#fff;
+  border:1px dashed #d9d9d9;
+  border-radius: 16px;
+  padding: 18px;
+  opacity: .85;
+}
+
+/* Product card uniform + badge */
+.card { height: 230px; display:flex; flex-direction:column; }
+.cardImg { height: 140px; object-fit: cover; }
+.cardMetaRow { display:flex; justify-content:space-between; align-items:center; gap: 10px; }
+.badge { font-size: 12px; font-weight: 900; padding: 6px 8px; border-radius: 999px; background:#f3f4f6; }
+.cardEdit { outline: 3px solid rgba(234,179,8,.35); }
+
+/* Admin dock */
+.adminDock{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  display: flex;
+  gap: 14px;
+  z-index: 20;
+}
+.fab{
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 950;
+  box-shadow: 0 10px 24px rgba(0,0,0,.20);
+  font-size: 18px;
+}
+.fabAdd{ background:#18a34a; color:#fff; }
+.fabEdit{ background:#eab308; color:#111; }
+.fabActive{ outline: 3px solid rgba(17,24,39,.25); }
+
+/* Modal */
+.modalOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 30;
+}
+.modalCard{
+  width: min(560px, 96vw);
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 14px 34px rgba(0,0,0,.25);
+  padding: 16px;
+}
+.modalTop{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.modalTitle{ font-weight: 950; font-size: 20px; }
+.modalForm{ margin-top: 12px; display:grid; gap: 12px; }
+.fieldLabel{ font-weight: 900; margin-bottom: 6px; }
+.fieldInput{
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  font-weight: 700;
+}
+.keepImgRow{ display:flex; align-items:center; gap:10px; margin-top: 10px; font-weight: 700; opacity:.9; }
+.modalActions{ display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-top: 8px; }
+.btnDanger{
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 950;
+  cursor: pointer;
+  background: #dc2626;
+  color: white;
+}
+
+/* EndDay details */
+.orderRowBtn{ width:100%; text-align:left; background:#fff; cursor:pointer; }
+.orderDetail{ margin-top: 14px; }
+.orderDetailTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.orderCats{ display:grid; gap: 12px; }
+.catBlock{ border:1px solid #eee; border-radius: 16px; padding: 12px; background:#fff; }
+.catHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 10px; }
+.catName{ font-weight: 950; }
+.catTotal{ font-weight: 950; }
+.catLines{ display:grid; gap: 10px; }
+.lineRow{ display:flex; justify-content:space-between; align-items:center; gap: 10px; padding: 10px; border:1px solid #f0f0f0; border-radius: 12px; }
+.lineName{ font-weight: 900; }
+.lineMeta{ font-size: 13px; opacity: .75; margin-top: 2px; }
+.lineSubtotal{ font-weight: 950; }
+
+/* Alert modal (centrado) */
+.alertCard{
+  width: min(420px, 92vw);
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 14px 34px rgba(0,0,0,.25);
+  padding: 16px;
+  text-align: center;
+}
+.alertTitle{ font-weight: 950; font-size: 18px; }
+.alertMsg{ margin: 10px 0 14px; opacity: .85; font-weight: 700; }
+
+/* fila para selector + crear categoría */
+.catPickRow{ display:flex; gap:10px; align-items:center; }
+.catPickRow .fieldInput{ flex: 1; }

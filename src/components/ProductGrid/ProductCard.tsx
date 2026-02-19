@@ -1,18 +1,28 @@
 import type { Product } from "../../domain/types";
 import { formatPEN } from "../../domain/cart";
 
+function getImgSrc(p: Product) {
+  if (p.imageDataUrl) return p.imageDataUrl;
+  if (p.image) return `/products/${p.image}`;
+  return "";
+}
+
 export default function ProductCard({
   product,
-  onAdd,
+  onClick,
+  isEditMode,
 }: {
   product: Product;
-  onAdd: (p: Product) => void;
+  onClick: (p: Product) => void;
+  isEditMode: boolean;
 }) {
+  const src = getImgSrc(product);
+
   return (
-    <button className="card" onClick={() => onAdd(product)}>
+    <button className={`card ${isEditMode ? "cardEdit" : ""}`} onClick={() => onClick(product)}>
       <img
         className="cardImg"
-        src={`/products/${product.image}`}
+        src={src}
         alt={product.name}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src =
@@ -29,7 +39,10 @@ export default function ProductCard({
       />
       <div className="cardBody">
         <div className="cardTitle">{product.name}</div>
-        <div className="cardPrice">{formatPEN(product.price)}</div>
+        <div className="cardMetaRow">
+          <div className="badge">{product.category}</div>
+          <div className="cardPrice">{formatPEN(product.price)}</div>
+        </div>
       </div>
     </button>
   );
