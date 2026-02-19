@@ -350,3 +350,73 @@ body { margin: 0; background: #f6f7fb; font-family: system-ui, -apple-system, Se
 
 .qrBig { width: min(360px, 80vw); border-radius: 16px; background: white; padding: 10px; border: 1px solid #eee; display: block; margin: 0 auto; }
 .checkoutHint { margin-top: 10px; opacity: .75; font-weight: 700; text-align: center; }
+
+/* ===== Responsive base ===== */
+* { box-sizing: border-box; }
+.page { min-height: 100vh; }
+
+/* Layout default (desktop/tablet landscape) */
+.layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; padding: 14px; }
+
+/* Topbar */
+.topbar { position: sticky; top: 0; z-index: 10; background: white; padding: 10px 14px; border-bottom: 1px solid #eee; }
+
+/* Admin dock: que no se apile feo */
+.adminDock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid #eee;
+  backdrop-filter: blur(8px);
+  z-index: 30;
+}
+
+/* Terminar día: que no choque con dock */
+.btnEndDayFloating { position: fixed; left: 14px; bottom: 14px; z-index: 31; }
+
+/* Productos: grid que se adapta */
+.productGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+
+/* ===== Tablet portrait y móviles ===== */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding-bottom: 110px; } /* deja espacio para dock */
+  .right { order: 2; } /* carrito debajo */
+  .left { order: 1; }
+
+  /* Grid de productos más grande y ordenado */
+  .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Dock centrado y compacto */
+  .adminDock { bottom: 10px; gap: 8px; padding: 8px; border-radius: 16px; }
+
+  /* Botón Terminar día que no tape el dock */
+  .btnEndDayFloating { bottom: 80px; } /* sube para no chocar con dock */
+}
+
+/* ===== Móvil pequeño ===== */
+@media (max-width: 420px) {
+  .productGrid { grid-template-columns: 1fr; } /* 1 columna en celulares chicos */
+  .topTitle { font-size: 18px; }
+}
+
+/* ===== Imágenes de productos: todas iguales ===== */
+.productCard img,
+.productImg {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+/* Evita botones apretados */
+.btnPrimary, .btnSecondary, .btnDanger { min-height: 42px; }
+
+.catRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.searchRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.searchInput { flex: 1; min-width: 220px; }

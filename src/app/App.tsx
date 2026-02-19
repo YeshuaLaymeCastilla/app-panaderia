@@ -66,7 +66,7 @@ export default function App() {
   return (
     <div className="page">
       <div className="topbar">
-        <div className="topTitle">App Panadería</div>
+        <div className="topTitle">Kamay App</div>
       </div>
 
       <div className="layout">
