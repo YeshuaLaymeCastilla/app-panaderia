@@ -3,8 +3,8 @@ import defaultProductsRaw from "../data/products.json";
 import type { CartItem, Category, Order, OrderLine, Product } from "../domain/types";
 import { addToCart, removeFromCart, totalOf, clearCart } from "../domain/cart";
 import { categoryKey, prettyCategoryName } from "../domain/normalize";
-import { idb } from "../domain/idb";
 import { capitalizeFirst } from "../domain/text";
+import { idb } from "../domain/idb";
 
 type Screen = "welcome" | "order" | "checkout" | "endday";
 
@@ -25,6 +25,7 @@ export function useKioskStore() {
   const defaultProducts = defaultProductsRaw as Product[];
 
   const [screen, setScreen] = useState<Screen>("welcome");
+
   const [cart, setCart] = useState<CartItem[]>([]);
 
   const [dayStartISO, setDayStartISO] = useState<string | null>(null);
@@ -34,14 +35,14 @@ export function useKioskStore() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // filtros
   const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState("");
 
-  // carga inicial
+  const [yapeQrDataUrl, setYapeQrDataUrl] = useState<string | null>(null);
+
+  // -------- CARGA INICIAL --------
   useEffect(() => {
     (async () => {
-      // Día / orders
       const start = await idb.getDay("start");
       const end = await idb.getDay("end");
       const ord = await idb.getOrders();
@@ -50,105 +51,109 @@ export function useKioskStore() {
       setDayEndISO(end);
       setOrders(ord);
 
-      if (start && !end) setScreen("order");
-      if (start && end) setScreen("endday");
-
-      // Productos
+      // productos
       const dbProducts = await idb.getProducts();
-      const hasAny = dbProducts.length > 0;
+      const base = dbProducts.length ? dbProducts : defaultProducts;
 
-      const base = hasAny ? dbProducts : defaultProducts;
-
-      // Si DB estaba vacía, inicializamos con defaults
-      if (!hasAny) await idb.setProducts(base);
+      if (!dbProducts.length) await idb.setProducts(base);
 
       setProducts(base);
 
-      // Categorías: si DB está vacía, las derivamos de productos
+      // categorías
       const dbCats = await idb.getCategories();
-      if (dbCats.length === 0) {
-        const fromProducts = deriveCategories(base);
-        for (const c of fromProducts) await idb.upsertCategory(c);
-        setCategories(fromProducts);
+      if (!dbCats.length) {
+        const derived = deriveCategories(base);
+        for (const c of derived) await idb.upsertCategory(c);
+        setCategories(derived);
       } else {
-        setCategories(sortCats(dbCats));
+        setCategories(dbCats);
       }
+
+      // QR Yape
+      const qr = await idb.getSetting("yape_qr");
+      setYapeQrDataUrl(qr);
     })();
   }, []);
 
   const total = useMemo(() => totalOf(cart), [cart]);
 
-  const categoryNames = useMemo(() => {
-    const names = ["Todos", ...categories.map((c) => c.name)];
-    return names;
-  }, [categories]);
+  const categoryNames = useMemo(() => ["Todos", ...categories.map((c) => c.name)], [categories]);
 
   const filteredProducts = useMemo(() => {
     let list = products;
 
-    if (selectedCategory !== "Todos") {
+    if (selectedCategory !== "Todos")
       list = list.filter((p) => p.category === selectedCategory);
-    }
 
     const q = query.trim().toLowerCase();
-    if (q.length >= 3) {
-      list = list.filter((p) => (`${p.name} ${p.category}`).toLowerCase().includes(q));
-    }
+    if (q.length >= 3)
+      list = list.filter((p) =>
+        (`${p.name} ${p.category}`).toLowerCase().includes(q)
+      );
 
     return list.slice().sort((a, b) => a.name.localeCompare(b.name));
   }, [products, selectedCategory, query]);
 
-  // carrito
+  // -------- CARRITO --------
   function addProductToCart(p: Product) {
     setCart((prev) => addToCart(prev, p));
   }
-  function addById(productId: string) {
-    const p = products.find((x) => x.id === productId);
+
+  function addById(id: string) {
+    const p = products.find((x) => x.id === id);
     if (!p) return;
     setCart((prev) => addToCart(prev, p));
   }
-  function removeById(productId: string) {
-    setCart((prev) => removeFromCart(prev, productId));
+
+  function removeById(id: string) {
+    setCart((prev) => removeFromCart(prev, id));
   }
+
   function clearCartNow() {
     setCart(clearCart());
   }
 
-  // día
+  // -------- DÍA --------
   async function startDay() {
     const now = new Date().toISOString();
+
     setDayStartISO(now);
     setDayEndISO(null);
     setOrders([]);
-    await idb.setDay("start", now);
+    setCart([]);
+
     await idb.clearOrders();
-    await idb.setDay("end", ""); // lo limpiamos luego abajo
-    await idb.clearDay();        // mejor: limpia y setea start
+    await idb.clearDay();
     await idb.setDay("start", now);
+
     setScreen("order");
-    setCart(clearCart());
   }
 
   async function confirmPaid() {
     if (total <= 0) return;
-    const nowISO = new Date().toISOString();
 
-    const lines: OrderLine[] = cart.map((ci) => ({
-      productId: ci.product.id,
-      name: ci.product.name,
-      category: ci.product.category,
-      unitPrice: ci.product.price,
-      quantity: ci.quantity,
-      subtotal: ci.quantity * ci.product.price,
+    const now = new Date().toISOString();
+
+    const lines: OrderLine[] = cart.map((c) => ({
+      productId: c.product.id,
+      name: c.product.name,
+      category: c.product.category,
+      unitPrice: c.product.price,
+      quantity: c.quantity,
+      subtotal: c.quantity * c.product.price,
     }));
 
-    const order: Order = { id: makeId(), total, paidAtISO: nowISO, lines };
+    const order: Order = {
+      id: makeId(),
+      total,
+      paidAtISO: now,
+      lines,
+    };
 
     await idb.addOrder(order);
-    const next = await idb.getOrders();
-    setOrders(next);
+    setOrders(await idb.getOrders());
 
-    setCart(clearCart());
+    setCart([]);
     setScreen("order");
   }
 
@@ -161,53 +166,75 @@ export function useKioskStore() {
 
   async function closeApp() {
     setScreen("welcome");
-    setCart(clearCart());
+    setCart([]);
     setDayStartISO(null);
     setDayEndISO(null);
     setOrders([]);
+
     await idb.clearOrders();
     await idb.clearDay();
   }
 
-  // categorías
-  async function createCategory(rawName: string): Promise<{ ok: true; category: Category } | { ok: false; reason: "exists" | "empty"; existingName?: string }> {
-    const pretty = prettyCategoryName(rawName);
-    const key = categoryKey(rawName);
+  // -------- CATEGORÍAS --------
+  type CreateCategoryResult =
+    | { ok: true; category: Category }
+    | { ok: false; reason: "empty" | "exists"; existingName?: string };
 
-    if (!pretty || !key) return { ok: false, reason: "empty" };
+  async function createCategory(raw: string): Promise<CreateCategoryResult> {
+    const name = prettyCategoryName(raw);
+    const key = categoryKey(raw);
+
+    if (!name || !key) return { ok: false, reason: "empty" };
 
     const exists = categories.find((c) => c.key === key);
     if (exists) return { ok: false, reason: "exists", existingName: exists.name };
 
-    const cat: Category = { key, name: pretty };
+    const cat: Category = { key, name };
     await idb.upsertCategory(cat);
 
-    const next = sortCats([...categories, cat]);
-    setCategories(next);
+    setCategories((prev) => [...prev, cat].sort((a, b) => a.name.localeCompare(b.name)));
 
-    // si usuario estaba en "Todos", nada. Si estaba en categoría inexistente, no aplica.
     return { ok: true, category: cat };
   }
 
-  // productos (admin)
+  async function deleteCategory(key: string) {
+    const cat = categories.find((c) => c.key === key);
+    if (!cat) return;
+
+    const hasProducts = products.some((p) => p.category === cat.name);
+    if (hasProducts) return;
+
+    await idb.deleteCategory(key);
+
+    const next = categories.filter((c) => c.key !== key);
+    setCategories(next);
+
+    if (selectedCategory === cat.name) setSelectedCategory("Todos");
+  }
+
+  // -------- PRODUCTOS --------
   async function addNewProduct(payload: { name: string; price: number; categoryName: string; file?: File | null }) {
     const p: Product = {
       id: makeId(),
       name: capitalizeFirst(payload.name),
       price: payload.price,
-      category: payload.categoryName,
+      category: prettyCategoryName(payload.categoryName) || "Otros",
     };
 
-    if (payload.file) {
-      p.imageDataUrl = await readFileAsDataURL(payload.file);
-    }
+    if (payload.file) p.imageDataUrl = await readFileAsDataURL(payload.file);
 
     await idb.upsertProduct(p);
-    const next = (await idb.getProducts()).sort((a, b) => a.name.localeCompare(b.name));
-    setProducts(next);
+    setProducts(await idb.getProducts());
   }
 
-  async function updateExistingProduct(payload: { id: string; name: string; price: number; categoryName: string; file?: File | null; keepExistingImage: boolean }) {
+  async function updateExistingProduct(payload: {
+    id: string;
+    name: string;
+    price: number;
+    categoryName: string;
+    file?: File | null;
+    keepExistingImage: boolean;
+  }) {
     const current = products.find((x) => x.id === payload.id);
     if (!current) return;
 
@@ -215,80 +242,90 @@ export function useKioskStore() {
       ...current,
       name: capitalizeFirst(payload.name),
       price: payload.price,
-      category: payload.categoryName,
+      category: prettyCategoryName(payload.categoryName) || "Otros",
     };
 
     if (!payload.keepExistingImage) {
       updated.image = undefined;
       updated.imageDataUrl = undefined;
     }
+
     if (payload.file) {
-      updated.image = undefined;
       updated.imageDataUrl = await readFileAsDataURL(payload.file);
     }
 
     await idb.upsertProduct(updated);
-    const next = (await idb.getProducts()).sort((a, b) => a.name.localeCompare(b.name));
-    setProducts(next);
+    setProducts(await idb.getProducts());
   }
 
   async function deleteProduct(id: string) {
     await idb.deleteProduct(id);
-    setCart((prev) => prev.filter((c) => c.product.id !== id));
-    const next = (await idb.getProducts()).sort((a, b) => a.name.localeCompare(b.name));
-    setProducts(next);
+    setProducts(await idb.getProducts());
+    setCart((c) => c.filter((x) => x.product.id !== id));
+  }
+
+  // -------- QR YAPE --------
+  async function setYapeQrFromFile(file: File) {
+    const data = await readFileAsDataURL(file);
+    await idb.setSetting("yape_qr", data);
+    setYapeQrDataUrl(data);
   }
 
   return {
-    // state
-    screen, setScreen,
-    cart, total,
-    dayStartISO, dayEndISO, orders,
-    products, filteredProducts,
-    categories, categoryNames,
-    selectedCategory, setSelectedCategory,
-    query, setQuery,
+    screen,
+    setScreen,
 
-    // actions
-    addProductToCart, addById, removeById, clearCartNow,
-    startDay, confirmPaid, endDay, closeApp,
+    cart,
+    total,
 
-    // admin
+    dayStartISO,
+    dayEndISO,
+    orders,
+
+    products,
+    filteredProducts,
+
+    categories,
+    categoryNames,
+
+    selectedCategory,
+    setSelectedCategory,
+
+    query,
+    setQuery,
+
+    addProductToCart,
+    addById,
+    removeById,
+    clearCartNow,
+
+    startDay,
+    confirmPaid,
+    endDay,
+    closeApp,
+
     createCategory,
-    addNewProduct, updateExistingProduct, deleteProduct,
     deleteCategory,
+
+    addNewProduct,
+    updateExistingProduct,
+    deleteProduct,
+
+    yapeQrDataUrl,
+    setYapeQrFromFile,
   };
-
-  async function deleteCategory(key: string) {
-    const next = categories.filter(c => c.key !== key);
-    setCategories(next);
-
-    const db = await (await import("../domain/idb")).idb;
-    const all = await db.getCategories();
-
-    for (const c of all) {
-      if (c.key === key) {
-        const d = indexedDB.open("kiosk_app_db");
-        d.onsuccess = () => {
-          const tx = d.result.transaction("categories", "readwrite");
-          tx.objectStore("categories").delete(key);
-        };
-      }
-    }
-  }
-
 }
+
+// -------- HELPERS --------
 
 function deriveCategories(products: Product[]): Category[] {
   const map = new Map<string, Category>();
+
   for (const p of products) {
     const key = categoryKey(p.category);
     const name = prettyCategoryName(p.category);
-    if (key && name && !map.has(key)) map.set(key, { key, name });
+    if (!map.has(key)) map.set(key, { key, name });
   }
-  return sortCats(Array.from(map.values()));
-}
 
-function sortCats(cats: Category[]) {
-  return cats.slice().sort((a, b) => a.name.localeCompare(b.name));
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 }

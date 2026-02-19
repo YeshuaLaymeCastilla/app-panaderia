@@ -9,8 +9,9 @@ import EndOfDayScreen from "../components/EndOfDay/EndOfDayScreen";
 import AlertModal from "../components/Common/AlertModal";
 import { useKioskStore } from "../hooks/useKioskStore";
 
-// Si ya creaste el manager de categorías:
 import CategoryManager from "../components/Admin/CategoryManager";
+
+import YapeQrModal from "../components/Admin/YapeQrModal";
 
 type AdminMode = "none" | "edit";
 
@@ -23,6 +24,8 @@ export default function App() {
 
   const [showCats, setShowCats] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
+
+  const [showYape, setShowYape] = useState(false);
 
   const editProduct = editProductId
     ? s.products.find((p) => p.id === editProductId) ?? null
@@ -46,6 +49,8 @@ export default function App() {
     return (
       <CheckoutScreen
         total={s.total}
+        qrSrc={s.yapeQrDataUrl}
+        cart={s.cart}
         onBack={() => s.setScreen("order")}
         onConfirmPaid={s.confirmPaid}
       />
@@ -166,6 +171,16 @@ export default function App() {
         >
           ☰
         </button>
+
+        {/* Botón para gestionar QR de Yape */}
+        <button
+          className="fab"
+          title="Configurar QR de Yape"
+          style={{ background: "#7c3aed", color: "white" }}
+          onClick={() => setShowYape(true)}
+        >
+          💲
+        </button>
       </div>
 
       {/* Modal Agregar */}
@@ -236,6 +251,15 @@ export default function App() {
       {/* Alerta centrada */}
       {alert && (
         <AlertModal title="Categoría" message={alert} onClose={() => setAlert(null)} />
+      )}
+
+      {/* Modal QR de Yape */}
+      {showYape && (
+        <YapeQrModal
+          current={s.yapeQrDataUrl}
+          onClose={() => setShowYape(false)}
+          onSaveFile={s.setYapeQrFromFile}
+        />
       )}
     </div>
   );

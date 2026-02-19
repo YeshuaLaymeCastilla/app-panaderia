@@ -297,3 +297,56 @@ body { margin: 0; background: #f6f7fb; font-family: system-ui, -apple-system, Se
   opacity: .8;
   font-weight: 700;
 }
+
+.fileHidden { display: none; }
+
+.photoRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filePicked {
+  margin-top: 8px;
+  font-size: 13px;
+  opacity: .8;
+  font-weight: 700;
+}
+
+.qrPreviewWrap { display: grid; gap: 8px; }
+.qrPreview { width: min(320px, 70vw); border-radius: 16px; border: 1px solid #eee; }
+
+.fileVisuallyHidden{
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.checkout { padding: 16px; display: grid; place-items: center; }
+.checkoutCard { width: min(1100px, 96vw); background: white; border-radius: 18px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+
+.checkoutTop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.checkoutTitle { font-size: 20px; font-weight: 900; }
+
+.checkoutBody { margin-top: 14px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
+@media (max-width: 900px) { .checkoutBody { grid-template-columns: 1fr; } }
+
+.checkoutLeft, .checkoutRight { background: #f7f7fb; border-radius: 16px; padding: 12px; }
+
+.checkoutSectionTitle { font-weight: 900; margin-bottom: 10px; }
+
+.checkoutList { display: grid; gap: 10px; }
+.checkoutLine { display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 14px; padding: 10px 12px; border: 1px solid #eee; }
+.checkoutLineName { font-weight: 800; display: flex; gap: 8px; align-items: baseline; }
+.checkoutQty { opacity: .7; font-weight: 900; }
+.checkoutLinePrice { font-weight: 900; }
+
+.checkoutTotalBox { margin-top: 12px; background: white; border-radius: 16px; padding: 12px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: baseline; }
+.checkoutTotalLabel { font-weight: 900; opacity: .75; }
+.checkoutTotalValue { font-size: 26px; font-weight: 1000; }
+
+.qrBig { width: min(360px, 80vw); border-radius: 16px; background: white; padding: 10px; border: 1px solid #eee; display: block; margin: 0 auto; }
+.checkoutHint { margin-top: 10px; opacity: .75; font-weight: 700; text-align: center; }
